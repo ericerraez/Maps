@@ -10,12 +10,16 @@ const Footer = () => {
         navigation.navigate('Maps');
     };
 
+    const handleUserPress = () => {
+        navigation.navigate('Users');
+    };
+
     return (
         <View style={styles.footerContainer}>
             <TouchableOpacity style={styles.iconButton} onPress={handleMapPress}>
                 <MaterialCommunityIcons name="map" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={handleUserPress}>
                 <MaterialCommunityIcons name="account" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>

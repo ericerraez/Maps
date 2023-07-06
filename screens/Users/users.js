@@ -2,16 +2,20 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import Header from '../Home/components/header';
 import Footer from '../Home/components/footer';
+import UserProfile from './components/userprofile';
+import LatestMaps from './components/latestmaps';
+import Activity from './components/activity';
 
-const Users = () => {
+const UsersScreen = () => {
     return (
         <View>
             <Header />
-            <Text>Contenido de la pantalla de usuarios</Text>
-            <Text>Aquí puedes mostrar la lista de usuarios, formularios, etc.</Text>
+            <UserProfile />
+            <LatestMaps />
+            <Activity />
             <Footer />
         </View>
     );
 }
 
-export default Users;
+export default UsersScreen;
