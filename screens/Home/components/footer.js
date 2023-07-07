@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -14,6 +14,10 @@ const Footer = () => {
         navigation.navigate('Users');
     };
 
+    const handleEarthPress = () => {
+        navigation.navigate('MapsRepository');
+    };
+
     return (
         <View style={styles.footerContainer}>
             <TouchableOpacity style={styles.iconButton} onPress={handleMapPress}>
@@ -22,8 +26,10 @@ const Footer = () => {
             <TouchableOpacity style={styles.iconButton} onPress={handleUserPress}>
                 <MaterialCommunityIcons name="account" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-                <MaterialCommunityIcons name="bell" size={24} color="black" />
+            <TouchableOpacity style={styles.iconButton} onPress={handleEarthPress}>
+                <Text>
+                    <MaterialCommunityIcons name="earth" size={24} color="black" />
+                </Text>
             </TouchableOpacity>
         </View>
     );

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const CustomButton = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigation = useNavigation();
 
     const handleLoginButtonPress = () => {
         // Lógica para manejar el evento onPress del botón "Login"
@@ -13,6 +15,10 @@ const CustomButton = () => {
     const handleGoogleSignInButtonPress = () => {
         // Lógica para manejar el evento onPress del botón "Sign in with Google"
         // ...
+    };
+
+    const handleCreateAccountButtonPress = () => {
+        navigation.navigate('RegisterScreen');
     };
 
     return (
@@ -46,8 +52,9 @@ const CustomButton = () => {
                         resizeMode="contain"
                     />
                 </TouchableOpacity>
-                <Text style={styles.registerText}>Aún no te has registrado?</Text>
-                <Text style={styles.createAccountLink}>Create Account</Text>
+                <TouchableOpacity style={styles.createAccountButton} onPress={handleCreateAccountButtonPress}>
+                    <Text style={styles.createAccountButtonText}>Create Account</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -101,12 +108,13 @@ const styles = StyleSheet.create({
         width: 120,
         height: 60,
     },
-    registerText: {
+    createAccountButton: {
         marginTop: 10,
-        marginBottom: 5,
     },
-    createAccountLink: {
+    createAccountButtonText: {
         color: 'blue',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 

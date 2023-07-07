@@ -1,13 +1,20 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const UserProfile = () => {
+    const navigation = useNavigation();
+
+    const handleProfilePress = () => {
+        navigation.navigate('Home');
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.profileContainer}>
                 <Text style={styles.profileText}>User Profile</Text>
-                <TouchableOpacity style={styles.iconButton}>
+                <TouchableOpacity style={styles.iconButton} onPress={handleProfilePress}>
                     <MaterialCommunityIcons name="account" size={18} color="black" />
                 </TouchableOpacity>
             </View>
@@ -59,7 +66,7 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     bioContainer: {
-        marginBottom: 10, // Espacio entre la biografía y los botones
+        marginBottom: 10,
     },
     bioText: {
         fontSize: 16,
