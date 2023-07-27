@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, Text } from 'react-native';
+import axios from 'axios';
 
 const ListOfMaps = () => {
-    // Datos de ejemplo de la lista de mapas
-    const data = [
-        { id: '1', name: 'Mapa 1' },
-        { id: '2', name: 'Mapa 2' },
-        { id: '3', name: 'Mapa 3' },
-        // Agrega más elementos de la lista según sea necesario
-    ];
+    const [locations, setLocations] = useState([]);
 
-    // Renderizar cada elemento de la lista
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://192.168.1.8:8081/locations');
+            setLocations(response.data);
+        } catch (error) {
+            console.error('Error fetching location data:', error);
+        }
+    };
+
     const renderItem = ({ item }) => (
         <View style={styles.itemContainer}>
             <Text style={styles.itemText}>{item.name}</Text>
@@ -20,9 +27,9 @@ const ListOfMaps = () => {
     return (
         <View style={styles.container}>
             <FlatList
-                data={data}
+                data={locations}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()} // Convertir el ID a string para usarlo como key
             />
         </View>
     );

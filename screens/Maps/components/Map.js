@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Button, TextInput, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import axios from 'axios';
 
 const Map = () => {
     const [initialPosition, setInitialPosition] = useState(null);
-    const [selectedCoordinates, setSelectedCoordinates] = useState(null);
+    const [markers, setMarkers] = useState([]);
     const [showMap, setShowMap] = useState(true);
-    const [savedCoordinates, setSavedCoordinates] = useState([]);
+    const [showDataForm, setShowDataForm] = useState(false);
+    const [fullname, setFullname] = useState('');
+    const [latitude, setLatitude] = useState('');
+    const [longitude, setLongitude] = useState('');
 
     useEffect(() => {
         (async () => {
@@ -30,7 +34,9 @@ const Map = () => {
 
     const handleMapLongPress = (event) => {
         const { coordinate } = event.nativeEvent;
-        setSelectedCoordinates(coordinate);
+        setMarkers([...markers, coordinate]);
+        setLatitude(String(coordinate.latitude));
+        setLongitude(String(coordinate.longitude));
     };
 
     const handleHideMap = () => {
@@ -42,32 +48,38 @@ const Map = () => {
     };
 
     const handleSaveCoordinates = () => {
-        if (selectedCoordinates) {
-            Alert.prompt(
-                'Guardar coordenada',
-                'Ingrese el nombre de la ubicación:',
-                (name) => {
-                    if (name) {
-                        const coordinates = {
-                            latitude: selectedCoordinates.latitude,
-                            longitude: selectedCoordinates.longitude,
-                            name: name,
-                        };
+        if (markers.length > 0) {
+            const dataToSend = {
+                fullname: fullname,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
+                coordinates: markers.map((marker) => ({
+                    latitude: marker.latitude,
+                    longitude: marker.longitude,
+                })),
+            };
 
-                        setSavedCoordinates([...savedCoordinates, coordinates]);
-                        setSelectedCoordinates(null);
+            axios
+                .post('http://192.168.1.8:8081/locations', dataToSend)
+                .then((response) => {
+                    console.log('Coordinates saved successfully:', response.data);
+                    // Handle the response from the backend if needed
 
-                        Alert.alert(
-                            'Guardado exitosamente',
-                            `Coordenadas guardadas:\nLatitud: ${selectedCoordinates.latitude}\nLongitud: ${selectedCoordinates.longitude}\nNombre: ${name}`
-                        );
-                    } else {
-                        Alert.alert('Error', 'Por favor, ingrese un nombre válido.');
-                    }
-                },
-                'plain-text',
-                ''
-            );
+                    // Deshabilitar los campos de entrada una vez que se haya guardado la información
+                    setFullname('');
+                    setLatitude('');
+                    setLongitude('');
+                    setShowDataForm(false); // Ocultar el formulario después de guardar
+                })
+                .catch((error) => {
+                    console.error('Error saving coordinates:', error);
+                    // Handle the error if needed
+                });
+
+            setMarkers([]);
+            setShowDataForm(false); // Ocultar el formulario después de guardar
+        } else {
+            Alert.alert('Error', 'No hay marcadores para guardar.');
         }
     };
 
@@ -86,20 +98,10 @@ const Map = () => {
                         onLongPress={handleMapLongPress}
                         showsUserLocation
                     >
-                        {selectedCoordinates && (
-                            <Marker coordinate={selectedCoordinates} />
-                        )}
+                        {markers.map((marker, index) => (
+                            <Marker key={index} coordinate={marker} />
+                        ))}
                     </MapView>
-                    {selectedCoordinates && (
-                        <View style={styles.coordinatesContainer}>
-                            <Text style={styles.coordinatesText}>
-                                Latitude: {selectedCoordinates.latitude}
-                            </Text>
-                            <Text style={styles.coordinatesText}>
-                                Longitude: {selectedCoordinates.longitude}
-                            </Text>
-                        </View>
-                    )}
                 </View>
             )}
             {!showMap && (
@@ -112,14 +114,44 @@ const Map = () => {
                     <Button title="Hide Map" onPress={handleHideMap} />
                 </View>
             )}
-            {showMap && (
+            {showMap && markers.length > 0 && !showDataForm && (
                 <View style={styles.saveButtonContainer}>
-                    <Button title="Save Coordinates" onPress={handleSaveCoordinates} />
+                    <Button title="Save Coordinates" onPress={() => setShowDataForm(true)} />
                 </View>
             )}
 
+            {showDataForm && (
+                <View style={styles.formContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Nombre de la ubicación"
+                        value={fullname}
+                        onChangeText={setFullname}
+                        // Deshabilitar el campo de entrada una vez que se haya guardado la información
+                        editable={!fullname}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Latitud"
+                        value={latitude}
+                        onChangeText={setLatitude}
+                        keyboardType="numeric"
+                        // Deshabilitar el campo de entrada una vez que se haya guardado la información
+                        editable={!latitude}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Longitud"
+                        value={longitude}
+                        onChangeText={setLongitude}
+                        keyboardType="numeric"
+                        // Deshabilitar el campo de entrada una vez que se haya guardado la información
+                        editable={!longitude}
+                    />
+                    <Button title="Save Coordinates" onPress={handleSaveCoordinates} />
+                </View>
+            )}
         </View>
-
     );
 };
 
@@ -149,22 +181,29 @@ const styles = StyleSheet.create({
         top: 16,
         right: 16,
     },
-    coordinatesContainer: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-        padding: 8,
-        borderRadius: 8,
-    },
-    coordinatesText: {
-        fontWeight: 'bold',
-    },
     saveButtonContainer: {
         position: 'absolute',
-        bottom: 482,
+        bottom: 16,
         alignSelf: 'center',
-        right: 1,
+    },
+    formContainer: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 16,
+        margin: 16,
+        width: '80%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        bottom: 80,
+    },
+    input: {
+        width: '100%',
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginBottom: 8,
+        paddingHorizontal: 8,
     },
 });
 
